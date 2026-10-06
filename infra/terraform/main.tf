@@ -56,14 +56,14 @@ resource "kubernetes_deployment_v1" "api" {
               cpu    = "25m"
               memory = "32Mi"
             }
-            limits   = {
+            limits = {
               cpu    = "250m"
               memory = "128Mi"
             }
           }
           security_context {
             allow_privilege_escalation = false
-            read_only_root_filesystem = true
+            read_only_root_filesystem  = true
             capabilities {
               drop = ["ALL"]
             }
