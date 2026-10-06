@@ -17,8 +17,8 @@ variable "image" {
 }
 
 variable "replicas" {
-  type        = number
-  default     = 2
+  type    = number
+  default = 2
   validation {
     condition     = var.replicas >= 1 && floor(var.replicas) == var.replicas
     error_message = "replicas must be a positive integer."

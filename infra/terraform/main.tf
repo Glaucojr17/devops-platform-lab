@@ -52,8 +52,14 @@ resource "kubernetes_deployment_v1" "api" {
             period_seconds        = 10
           }
           resources {
-            requests = { cpu = "25m", memory = "32Mi" }
-            limits   = { cpu = "250m", memory = "128Mi" }
+            requests = {
+              cpu    = "25m"
+              memory = "32Mi"
+            }
+            limits   = {
+              cpu    = "250m"
+              memory = "128Mi"
+            }
           }
           security_context {
             allow_privilege_escalation = false
