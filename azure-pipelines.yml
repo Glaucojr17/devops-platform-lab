@@ -1,0 +1,20 @@
+trigger:
+  branches:
+    include:
+      - main
+pool:
+  vmImage: ubuntu-latest
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '24.x'
+  - script: npm test
+    displayName: Testar API e endpoints operacionais
+  - task: Docker@2
+    displayName: Construir imagem local
+    inputs:
+      command: build
+      repository: devops-platform-lab
+      Dockerfile: Dockerfile
+      tags: |
+        $(Build.BuildId)

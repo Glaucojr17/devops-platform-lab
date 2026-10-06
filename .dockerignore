@@ -1,0 +1,9 @@
+.git
+.github
+infra
+k8s
+tests
+docs
+*.md
+azure-pipelines.yml
+node_modules
