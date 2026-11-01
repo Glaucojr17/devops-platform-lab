@@ -81,4 +81,6 @@ Antes de executá-lo, confirme que o preflight de 10 GiB passa e que `lab-ops` e
 
 ## Estado registrado
 
-**Inventário de 01/11/2026 observado.** Git não está instalado no Windows; os scripts podem ser baixados diretamente. O plano de três VMs foi substituído por duas VMs. Script de criação preparado, sem execução no host até aqui. Nenhuma VM nova, instalação K3s, Forgejo/runner ou implantação Zabbix/Grafana deste cenário foi validada no host. Próximo marco: executar o preflight atualizado, criar as duas VMs desligadas e instalar Linux uma por vez.
+**Resultado em 01/11/2026:** preflight atualizado passou com 17,3 GiB livres; `-Apply` passou com 17,1 GiB livres e criou `devops-ci` (4 GiB, 50 GiB VHDX) e `devops-k3s` (6 GiB, 100 GiB VHDX), ambas **Off**. O `Path` de configuração resultou em `L:\HyperV\VMs\devops-ci\devops-ci` e `L:\HyperV\VMs\devops-k3s\devops-k3s`; não altera o local dos VHDXs e será mantido nas VMs já criadas. O script foi corrigido para apontar ao diretório base em instalações futuras, sem movimentar as VMs existentes. Nenhum Debian novo, K3s, Forgejo/runner ou Zabbix/Grafana foi validado ainda. Próximo marco: instalar Linux, começando por `devops-ci`.
+
+Veja o [guia da primeira instalação](02-debian-ci.md).
