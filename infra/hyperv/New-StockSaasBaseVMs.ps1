@@ -95,10 +95,9 @@ try {
     foreach ($config in $plano) {
         try {
             $vhd = Join-Path $vhdRoot "$($config.Name)-os.vhdx"
-            $caminhoVm = Join-Path $vmRoot $config.Name
             New-VM -Name $config.Name -Generation 2 `
                 -MemoryStartupBytes ([int64]$config.RamGiB * 1GB) `
-                -Path $caminhoVm -NewVHDPath $vhd `
+                -Path $vmRoot -NewVHDPath $vhd `
                 -NewVHDSizeBytes ([int64]$config.DiskGiB * 1GB) `
                 -SwitchName 'Default Switch' -ErrorAction Stop | Out-Null
 
