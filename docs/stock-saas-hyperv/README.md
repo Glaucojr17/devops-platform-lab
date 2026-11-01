@@ -10,20 +10,20 @@ O laboratório parte de um host Windows 11 Pro/Hyper-V com cerca de 32 GiB de RA
 
 ```mermaid
 flowchart TD
-    A["GitHub: código e revisão"] --> B["CI: Azure DevOps ou GitHub Actions"]
-    B --> C["devops-ci: agente próprio e registry"]
+    A["Forgejo local: código e revisão"] --> B["Forgejo Actions: YAML"]
+    B --> C["devops-ci: runner e registry OCI"]
     C --> D["K3s no Hyper-V: controle e worker"]
     D --> E["Estoque API: dev, hom e prod simulada"]
     D --> F["Zabbix + PostgreSQL + Grafana"]
 ```
 
-O Azure DevOps Services é um serviço externo. Antes de prometer a execução do pipeline, confirmar se já existe uma organização acessível: a documentação atual da Microsoft exige assinatura Azure ativa para criar uma nova organização. Caso não exista e o usuário não queira ativar uma assinatura, executar o fluxo com GitHub Actions e agente próprio; manter `azure-pipelines.yml` como implementação preparada, explicitamente **sem execução validada**. O agente local alcança o cluster por `LAB-MGMT` e precisa de Internet para o serviço de CI escolhido e dependências. No Hyper-V, K3s e um registry OCI privado reproduzem **o fluxo de entrega** de Kubernetes e registro de imagens. Não são AKS nem ACR; nenhum resultado será descrito como execução nesses serviços.
+Todo o plano de controle de CI/CD ficará no homelab: Forgejo com repositório e Forgejo Actions, runner próprio e registry OCI do Forgejo. O GitHub é apenas a vitrine pública do código e das evidências revisadas, sincronizada depois. Internet pode ser usada para baixar imagens e dependências, mas nenhum serviço Azure participa da execução. O arquivo `azure-pipelines.yml` preexistente no repositório é um **exemplo preparado, não executado** neste cenário. K3s e o registry local permitem demonstrar o fluxo de Kubernetes e imagens, sem alegar uso de AKS/ACR. O runner terá credenciais de deploy restritas e tráfego local de gestão pela `LAB-MGMT`.
 
 ### Capacidade inicial, sujeita ao preflight
 
 | VM | CPU | RAM fixa | VHDX dinâmico | Rede |
 | --- | ---: | ---: | ---: | --- |
-| `devops-ci` | 2 | 4 GiB | 50 GiB | Default Switch e LAB-MGMT |
+| `devops-ci` | 2 | 4 GiB | 50 GiB | Default Switch e LAB-MGMT; Forgejo, runner e registry |
 | `devops-k3s-cp` | 2 | 4 GiB | 40 GiB | Default Switch e LAB-MGMT |
 | `devops-k3s-worker` | 2 | 7 GiB | 70 GiB | Default Switch e LAB-MGMT |
 
@@ -41,7 +41,7 @@ As novas VMs somam 15 GiB. Com as VMs de backup ligadas, o total configurado dos
 1. **Inventário:** executar `infra/hyperv/Get-StockSaasPreflight.ps1`; conferir rótulos, caminhos, switches, VMs e margem de RAM. Não criar VMs se faltar margem ou houver nomes em uso.
 2. **Infraestrutura reproduzível:** provisionamento por PowerShell idempotente, sem limpeza de disco; Linux por Ansible e acesso por SSH. Validar cada etapa antes de prosseguir.
 3. **Aplicação:** API Node.js/TypeScript de estoque, com um cliente fictício e dados de demonstração; testes unitários, integração e rota de saúde. A aplicação terá armazenamento persistente e migrações versionadas.
-4. **CI/CD:** verificar organização Azure DevOps existente. Se disponível, executar pipeline YAML com agente auto-hospedado; se indisponível, executar no GitHub Actions e documentar a limitação do exemplo Azure. Em ambos: revisão por PR, build, testes, imagem tagueada pelo SHA do commit, scanner, registry local e deploy por Helm. PRs não recebem segredos de deploy.
+4. **CI/CD:** subir Forgejo e runner locais, executar workflow YAML em Forgejo Actions. Revisão por PR, build, testes, imagem tagueada pelo SHA do commit, scanner, publicação no registry OCI local e deploy por Helm. PRs não recebem segredos de deploy. Publicar no GitHub apenas código e documentação revisados; o fluxo local continua independente.
 5. **Ambientes:** namespaces `estoque-dev`, `estoque-hom` e `estoque-prod-simulada`; aprovação humana antes da última promoção, smoke test e rollback exercitado. Dados de teste e credenciais separados por namespace.
 6. **Monitoramento:** Zabbix Server, interface web e PostgreSQL **no cluster**, com volumes persistentes e limites de recursos; agentes/proxy do chart oficial para o cluster, conforme necessidade. Grafana **no cluster** com plugin de fonte de dados Zabbix. Monitorar saúde da API, disponibilidade, pods/nós e capacidade; provocar alerta e verificar recuperação. A instalação do chart oficial de integração não será confundida com a instalação do servidor Zabbix.
 7. **Recuperação:** testar backup e restore do banco do SaaS e da configuração declarativa, em destino segregado em `N:`; documentar perda aceitável, duração medida e limites do teste. Snapshot de VM não substitui backup consistente do banco.
@@ -49,7 +49,17 @@ As novas VMs somam 15 GiB. Com as VMs de backup ligadas, o total configurado dos
 
 ## Primeira execução: somente leitura
 
-No PowerShell do **host Windows**:
+No PowerShell do **host Windows**, sem depender da instalação do Git:
+
+```powershell
+$destino = 'E:\Projetos\Get-StockSaasPreflight.ps1'
+$url = 'https://raw.githubusercontent.com/Glaucojr17/devops-platform-lab/main/infra/hyperv/Get-StockSaasPreflight.ps1'
+Invoke-WebRequest -Uri $url -OutFile $destino -UseBasicParsing -ErrorAction Stop
+Unblock-File -LiteralPath $destino
+& $destino | ConvertTo-Json -Depth 8
+```
+
+Se o script já estiver disponível no clone do repositório, também pode ser executado por:
 
 ```powershell
 $script = '.\infra\hyperv\Get-StockSaasPreflight.ps1'
@@ -66,4 +76,4 @@ O script não cria VMs, não modifica discos e interrompe a leitura com erro se 
 
 ## Estado registrado
 
-**Planejamento e preflight preparados.** Até o momento, nenhuma VM nova, instalação K3s, pipeline ou implantação Zabbix/Grafana deste cenário foi validada no host. O próximo marco depende da saída do preflight no Windows e da confirmação de organização Azure DevOps existente.
+**Planejamento e preflight preparados.** Git ainda não está instalado no host Windows, então o inventário será baixado diretamente. Até o momento, nenhuma VM nova, instalação K3s, Forgejo/runner ou implantação Zabbix/Grafana deste cenário foi validada no host. O próximo marco depende da saída do preflight no Windows.
