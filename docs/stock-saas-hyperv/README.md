@@ -10,7 +10,7 @@ O laboratório parte de um host Windows 11 Pro/Hyper-V com cerca de 32 GiB de RA
 
 ```mermaid
 flowchart TD
-    A["GitHub: código e revisão"] --> B["Azure DevOps Services: YAML"]
+    A["GitHub: código e revisão"] --> B["CI: Azure DevOps ou GitHub Actions"]
     B --> C["devops-ci: agente próprio e registry"]
     C --> D["K3s no Hyper-V: controle e worker"]
     D --> E["Estoque API: dev, hom e prod simulada"]
