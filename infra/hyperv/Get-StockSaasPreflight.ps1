@@ -51,7 +51,7 @@ try {
     $nomesSwitch = @($switches | ForEach-Object { $_.Name })
     $faltamSwitches = @('Default Switch', 'LAB-MGMT') | Where-Object { $_ -notin $nomesSwitch }
     $ramLivreGiB = [math]::Round($sistema.FreePhysicalMemory / 1MB, 1)
-    $ramPlanejadaGiB = 15
+    $ramPlanejadaGiB = 10
     $reservaHostGiB = 6
 
     $verificacoes = [pscustomobject]@{
@@ -59,7 +59,7 @@ try {
         SwitchesBasePresentes = (@($faltamSwitches).Count -eq 0)
         CaminhosHostEmL = ($hostVm.VirtualMachinePath -like 'L:\*' -and $hostVm.VirtualHardDiskPath -like 'L:\*')
         RamLivreParaPlano = ($ramLivreGiB -ge ($ramPlanejadaGiB + $reservaHostGiB))
-        ColisaoNomes = (@($vms | Where-Object { $_.Nome -in @('devops-ci', 'devops-k3s-cp', 'devops-k3s-worker') }).Count -gt 0)
+        ColisaoNomes = (@($vms | Where-Object { $_.Nome -in @('devops-ci', 'devops-k3s') }).Count -gt 0)
     }
 
     [pscustomobject]@{
@@ -70,6 +70,7 @@ try {
         RamLivreGiB = $ramLivreGiB
         RamPlanejadaNovasVmsGiB = $ramPlanejadaGiB
         ReservaSugeridaHostGiB = $reservaHostGiB
+        RamLivreAposPlanoGiB = [math]::Round(($ramLivreGiB - $ramPlanejadaGiB), 1)
         CaminhosHyperV = [pscustomobject]@{
             Vms = $hostVm.VirtualMachinePath
             Vhdx = $hostVm.VirtualHardDiskPath
