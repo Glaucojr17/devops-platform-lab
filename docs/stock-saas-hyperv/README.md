@@ -17,7 +17,7 @@ flowchart TD
     D --> F["Zabbix + PostgreSQL + Grafana"]
 ```
 
-O Azure DevOps Services é um serviço externo, mesmo sem assinatura Azure para AKS/ACR. O agente local faz o build e alcança o cluster por `LAB-MGMT`; usa Internet apenas para conectar-se ao Azure DevOps e obter dependências. No Hyper-V, K3s e um registry OCI privado reproduzem **o fluxo de entrega** de Kubernetes e registro de imagens. Não são AKS nem ACR; nenhum resultado será descrito como execução nesses serviços.
+O Azure DevOps Services é um serviço externo. Antes de prometer a execução do pipeline, confirmar se já existe uma organização acessível: a documentação atual da Microsoft exige assinatura Azure ativa para criar uma nova organização. Caso não exista e o usuário não queira ativar uma assinatura, executar o fluxo com GitHub Actions e agente próprio; manter `azure-pipelines.yml` como implementação preparada, explicitamente **sem execução validada**. O agente local alcança o cluster por `LAB-MGMT` e precisa de Internet para o serviço de CI escolhido e dependências. No Hyper-V, K3s e um registry OCI privado reproduzem **o fluxo de entrega** de Kubernetes e registro de imagens. Não são AKS nem ACR; nenhum resultado será descrito como execução nesses serviços.
 
 ### Capacidade inicial, sujeita ao preflight
 
@@ -41,7 +41,7 @@ As novas VMs somam 15 GiB. Com as VMs de backup ligadas, o total configurado dos
 1. **Inventário:** executar `infra/hyperv/Get-StockSaasPreflight.ps1`; conferir rótulos, caminhos, switches, VMs e margem de RAM. Não criar VMs se faltar margem ou houver nomes em uso.
 2. **Infraestrutura reproduzível:** provisionamento por PowerShell idempotente, sem limpeza de disco; Linux por Ansible e acesso por SSH. Validar cada etapa antes de prosseguir.
 3. **Aplicação:** API Node.js/TypeScript de estoque, com um cliente fictício e dados de demonstração; testes unitários, integração e rota de saúde. A aplicação terá armazenamento persistente e migrações versionadas.
-4. **CI/CD:** pipeline YAML em Azure DevOps com agente auto-hospedado, revisão por PR, build, testes, imagem tagueada pelo SHA do commit, scanner, publicação em registry local e deploy por Helm. PRs não recebem segredos de deploy.
+4. **CI/CD:** verificar organização Azure DevOps existente. Se disponível, executar pipeline YAML com agente auto-hospedado; se indisponível, executar no GitHub Actions e documentar a limitação do exemplo Azure. Em ambos: revisão por PR, build, testes, imagem tagueada pelo SHA do commit, scanner, registry local e deploy por Helm. PRs não recebem segredos de deploy.
 5. **Ambientes:** namespaces `estoque-dev`, `estoque-hom` e `estoque-prod-simulada`; aprovação humana antes da última promoção, smoke test e rollback exercitado. Dados de teste e credenciais separados por namespace.
 6. **Monitoramento:** Zabbix Server, interface web e PostgreSQL **no cluster**, com volumes persistentes e limites de recursos; agentes/proxy do chart oficial para o cluster, conforme necessidade. Grafana **no cluster** com plugin de fonte de dados Zabbix. Monitorar saúde da API, disponibilidade, pods/nós e capacidade; provocar alerta e verificar recuperação. A instalação do chart oficial de integração não será confundida com a instalação do servidor Zabbix.
 7. **Recuperação:** testar backup e restore do banco do SaaS e da configuração declarativa, em destino segregado em `N:`; documentar perda aceitável, duração medida e limites do teste. Snapshot de VM não substitui backup consistente do banco.
@@ -66,4 +66,4 @@ O script não cria VMs, não modifica discos e interrompe a leitura com erro se 
 
 ## Estado registrado
 
-**Planejamento e preflight preparados.** Até o momento, nenhuma VM nova, instalação K3s, pipeline Azure DevOps ou implantação Zabbix/Grafana deste cenário foi validada no host. O próximo marco depende da saída do preflight no Windows.
+**Planejamento e preflight preparados.** Até o momento, nenhuma VM nova, instalação K3s, pipeline ou implantação Zabbix/Grafana deste cenário foi validada no host. O próximo marco depende da saída do preflight no Windows e da confirmação de organização Azure DevOps existente.
