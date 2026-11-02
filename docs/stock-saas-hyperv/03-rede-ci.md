@@ -62,8 +62,8 @@ O acesso à rede `10.77.10.0/24` deve usar `eth1`; a saída externa deve continu
 Test-NetConnection -ComputerName 10.77.10.21 -Port 22
 ```
 
-**Aceite:** `TcpTestSucceeded: True`, endereço de gestão persistente e rota padrão intacta. Antes de anexar evidências públicas, remova MAC, host físico e endereço DHCP transitório da captura.
+**Aceite observado em 02/11/2026:** `eth1` ficou ativa com `10.77.10.21/24`; a rota para o host usa `eth1`, enquanto a rota externa permanece em `eth0`. `Test-NetConnection` retornou `TcpTestSucceeded: True` com origem `10.77.10.1` na `LAB-MGMT`. Persistência após reboot ainda não foi verificada. Antes de anexar evidências públicas, remova MAC, host físico e endereço DHCP transitório da captura.
 
 ## Próximo marco
 
-Instalar a chave pública SSH, atualizar Debian e preparar automação. Depois repetir instalação e rede na `devops-k3s` com o endereço planejado `10.77.10.22/24`, validando o MAC dela antes.
+Prosseguir com o [bootstrap da devops-ci](04-bootstrap-ci.md). Depois repetir instalação e rede na `devops-k3s` com o endereço planejado `10.77.10.22/24`, validando o MAC dela antes.
