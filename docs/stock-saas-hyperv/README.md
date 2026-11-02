@@ -83,4 +83,6 @@ Antes de executá-lo, confirme que o preflight de 10 GiB passa e que `lab-ops` e
 
 **Resultado em 01/11/2026:** preflight atualizado passou com 17,3 GiB livres; `-Apply` passou com 17,1 GiB livres e criou `devops-ci` (4 GiB, 50 GiB VHDX) e `devops-k3s` (6 GiB, 100 GiB VHDX), ambas **Off**. O `Path` de configuração resultou em `L:\HyperV\VMs\devops-ci\devops-ci` e `L:\HyperV\VMs\devops-k3s\devops-k3s`; não altera o local dos VHDXs e será mantido nas VMs já criadas. O script foi corrigido para apontar ao diretório base em instalações futuras, sem movimentar as VMs existentes. Nenhum Debian novo, K3s, Forgejo/runner ou Zabbix/Grafana foi validado ainda. Próximo marco: instalar Linux, começando por `devops-ci`.
 
-Veja o [guia da primeira instalação](02-debian-ci.md).
+Veja o [guia da primeira instalação](02-debian-ci.md) e a [configuração da rede de gestão](03-rede-ci.md).
+
+**Debian da `devops-ci` validado em 02/11/2026:** hostname correto, Debian 13, disco virtual de 50 GiB, SSH ativo e saída DHCP pela `eth0`. A rede `MGMT` ainda será identificada por MAC e configurada sem gateway. `devops-k3s` permanece desligada; K3s, Forgejo e monitoramento ainda não foram instalados.
