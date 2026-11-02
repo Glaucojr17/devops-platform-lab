@@ -25,6 +25,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Falha ao enviar o script.' }
 
 Confirme a identidade da VM ao receber a pergunta sobre a chave do host SSH. O `scp` ainda pode pedir a **senha do usuário Debian**, pois a chave pública só será cadastrada na próxima etapa. Não publique sua chave privada, senha ou configuração pessoal do SSH.
 
+Na primeira tentativa registrada, a confirmação da chave do host SSH cancelou o envio da chave pública, embora o segundo `scp` tenha enviado o script. O bootstrap interrompeu com `Chave pública ausente ou vazia`. Repetir apenas o envio de `"$key.pub"` resolveu a falta do arquivo; não houve alteração de pacotes nessa tentativa interrompida.
+
 ## Executar na VM
 
 Entre pelo console Hyper-V ou por SSH com senha e execute:
@@ -34,6 +36,8 @@ sudo bash /home/glaucojunior/bootstrap-devops-ci.sh
 ```
 
 O script verifica hostname, endereço da MGMT e rota padrão antes de alterar algo. Depois valida a chave pública, cadastra-a uma única vez em `authorized_keys`, executa `apt-get update`, `upgrade` e instala `ca-certificates`, `curl`, `git`, `python3` e `ansible-core`. Interrompe ao primeiro erro e pode ser reexecutado após a correção. Não modifica a política de autenticação do SSH. Uma atualização de kernel poderá exigir reinicialização posterior, a ser feita após testar o login por chave e verificar as atualizações instaladas.
+
+**Resultado observado em 02/11/2026:** a segunda execução chegou a `Bootstrap concluído: devops-ci; MGMT 10.77.10.21/24` e reportou Git 2.47.3 e Ansible Core 2.19.11. O teste de login por chave a partir do Windows, `dpkg --audit` e a persistência após reboot ainda não foram enviados.
 
 ## Teste do host Windows
 
